@@ -4,6 +4,9 @@ inputs:
   submodule:
     description: Path to submodule (relative from repo root)
     required: true
+  repo:
+    description: Path to the repo
+    required: false
 outputs:
   hash:
     description: The hash of the submodule
@@ -13,12 +16,28 @@ runs:
   steps:
     - id: get-submodule-hash
       run: |
-        SUBMODULE_HASH="$(git submodule | awk '{ if ($2 == "${{ inputs.submodule }}") print $1 }')"
+        if [[ ! -z "${{ inputs.repo }}" ]]
+        then
+          REPO_ARGS="-C \"${{ inputs.repo }}\""
+        else
+          REPO_ARGS=""
+        fi
+        
+        SUBMODULES="$(git $REPO_ARGS submodule)"
+        if [[ $? -ne 0 ]]
+        then
+          echo ERROR git submodule failed
+          echo "$SUBMODULES"
+          exit 1
+        fi
+        
+        SUBMODULE_HASH="$(echo "$SUBMODULES" | awk '{ if ($2 == "${{ inputs.submodule }}") print $1 }')"
         if [[ -z "${SUBMODULE_HASH}" ]]
         then
           echo ERROR: could not get hash for submodule ${{ inputs.submodule }}
           git submodule
           exit 1
         fi
+        
         echo "::set-output name=hash::${SUBMODULE_HASH#"-"}"
       shell: bash
