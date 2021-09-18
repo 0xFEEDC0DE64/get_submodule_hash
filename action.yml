@@ -1,0 +1,24 @@
+name: Get submodule hash
+description: Tries to acquire the hash of a submodule
+inputs:
+  submodule:
+    description: Path to submodule (relative from repo root)
+    required: true
+outputs:
+  hash:
+    description: The hash of the submodule
+    value: ${{ steps.get-submodule-hash.outputs.hash }}
+runs:
+  using: composite
+  steps:
+    - id: get-submodule-hash
+      run: |
+        SUBMODULE_HASH="$(git submodule | awk '{ if ($2 == "${{ inputs.submodule }}") print $1 }')"
+        if [[ -z "${SUBMODULE_HASH}" ]]
+        then
+          echo ERROR: could not get hash for submodule ${{ inputs.submodule }}
+          git submodule
+          exit 1
+        fi
+        echo "::set-output name=hash::${SUBMODULE_HASH#"-"}"
+      shell: bash
