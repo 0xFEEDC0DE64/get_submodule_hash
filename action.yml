@@ -18,9 +18,9 @@ runs:
       run: |
         if [[ ! -z "${{ inputs.repo }}" ]]
         then
-          REPO_ARGS="-C \"${{ inputs.repo }}\""
+          REPO_ARGS=-C "${{ inputs.repo }}"
         else
-          REPO_ARGS=""
+          REPO_ARGS=
         fi
         
         SUBMODULES="$(git $REPO_ARGS submodule)"
