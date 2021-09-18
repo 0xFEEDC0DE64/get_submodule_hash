@@ -17,7 +17,7 @@ jobs:
 
     - name: Get submodule hash
       id: get-submodule-hash
-      uses: 0xFEEDC0DE64/get_submodule_hash
+      uses: 0xFEEDC0DE64/get_submodule_hash@main
       with:
         submodule: libs/corelib
 
